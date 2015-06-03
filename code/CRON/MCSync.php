@@ -28,7 +28,7 @@ class MCSync extends Controller {
         $this->apikey = SiteConfig::current_site_config()->getMCAPIKey();
         // Quit here if no API key available
         if(empty($this->apikey)) {
-            error_log($this->error_log_prefix()."No MailChimp API Key Provided, Aborting Syncronisation!");
+            SS_Log::log("No MailChimp API Key Provided, Aborting Syncronisation!", SS_LOG::NOTICE);
             exit();
         }
     }
