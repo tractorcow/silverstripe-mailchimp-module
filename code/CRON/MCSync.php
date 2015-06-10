@@ -69,7 +69,7 @@ class MCSync extends Controller {
     public function getLists() {
         $lists = new DataList("MCList");
         if($lists->count() == 0) {
-            error_log($this->error_log_prefix()."No MailChimp Lists To Run Updates Against! Exiting...");
+            SS_Log::log("No MailChimp Lists To Run Updates Against!", SS_Log::ERR);
             return array();
         } else {
             return $lists;
@@ -82,7 +82,7 @@ class MCSync extends Controller {
         $listFields = array();
         
         if(!is_object($list)) {
-            error_log($this->error_log_prefix()."getFieldListMappings() Requireds a MCList Object Parameter!");
+            SS_Log::log("getFieldListMappings() Requireds a MCList Object Parameter!", SS_Log::ERR);
             return $listFields;
         }
 
@@ -94,7 +94,7 @@ class MCSync extends Controller {
         }
         // If No List Field Mapping No Data Will Be Stored
         if(empty($listFields)) {
-            error_log($this->error_log_prefix()."No Import List Field Mappings For ".$list->Name." List! Exiting...");
+            SS_Log::log("No Import List Field Mappings For ".$list->Name." List!", SS_Log::ERR);
         }
         
         return $listFields;
@@ -105,7 +105,7 @@ class MCSync extends Controller {
     public function getLatestSyncCheckpoint($list = null) {
         
         if(!is_object($list)) {
-            error_log($this->error_log_prefix()."getLatestSyncCheckpoint() Requireds a MCList Object Parameter!");
+            SS_Log::log("getLatestSyncCheckpoint() Requireds a MCList Object Parameter!", SS_Log::ERR);
             return false;
         }
          
@@ -124,13 +124,13 @@ class MCSync extends Controller {
     public function setLatestSyncCheckpoint($checkpoint = null, $syncStart = 0) {
         
         if(!is_object($checkpoint) || empty($syncStart)) {
-            error_log($this->error_log_prefix()."setLatestSyncCheckpoint() Requireds A Checkpoint Object and Sync Start DateTime Parameters!");
+            SS_Log::log("setLatestSyncCheckpoint() Requireds A Checkpoint Object and Sync Start DateTime Parameters!", SS_Log::ERR);
             return false;
         }
         
         $checkpoint->setField("LastSuccessfulSync", $syncStart);
         $checkpoint->write();
-        error_log($this->error_log_prefix()."Succesfully Updated List ID ".$checkpoint->MCListID." @ ".$syncStart);
+        SS_Log::log("Succesfully Updated List ID ".$checkpoint->MCListID." @ ".$syncStart, SS_Log::NOTICE);
         
         return true;
         
@@ -141,7 +141,7 @@ class MCSync extends Controller {
         $api = new MCAPI($this->apikey);
         $retval = $api->ping();
         if ($api->errorCode){
-        	error_log($this->error_log_prefix()."Unable to load lists()! Error Code = ".$api->errorCode." Error Msg = ".$api->errorMessage);
+        	SS_Log::log("Unable to load lists()! Error Code = ".$api->errorCode." Error Msg = ".$api->errorMessage, SS_Log::ERR);
         	return false;
         } else {
             return gmdate('Y-m-d H:i:s', strtotime($retval['headers']['Date']));
@@ -155,7 +155,7 @@ class MCSync extends Controller {
         
         $retval = $api->lists();
         if ($api->errorCode){
-        	error_log($this->error_log_prefix()."Unable to load lists()! Error Code = ".$api->errorCode." Error Msg = ".$api->errorMessage);
+        	SS_Log::log("Unable to load lists()! Error Code = ".$api->errorCode." Error Msg = ".$api->errorMessage, SS_Log::ERR);
         	return false;
         } else {
             foreach ($retval['data'] as $list){
@@ -180,7 +180,7 @@ class MCSync extends Controller {
         		// via Admin -> Setting -> MC Lists -> List Field Relationships)
         		$retval = $api->listMergeVars($l->ListID);
                 if ($api->errorCode){
-                	error_log($this->error_log_prefix()."Unable to load listMergeVars()! Code = ".$api->errorCode." Msg = ".$api->errorMessage);
+                	SS_Log::log("Unable to load listMergeVars()! Code = ".$api->errorCode." Msg = ".$api->errorMessage, SS_Log::ERR);
                 	return false;
                 } else {
                     $currTags = array();
@@ -207,7 +207,7 @@ class MCSync extends Controller {
     public function UpdateMemberData($list = null, $checkpoint = null, $listFields = array()) {
     
         if(!is_object($list) || !is_object($checkpoint)) {
-            error_log($this->error_log_prefix()."UpdateMemberData() Requireds MCList Object and Sync Checkpoint Parameters!");
+            SS_Log::log("UpdateMemberData() Requires MCList Object and Sync Checkpoint Parameters!", SS_Log::ERR);
             return false;
         }
         
@@ -215,10 +215,10 @@ class MCSync extends Controller {
         
         $retval = $api->listMembers($list->ListID, 'updated', $checkpoint->LastSuccessfulSync, 0, 5000);
         if ($api->errorCode){
-            error_log($this->error_log_prefix()."API Call Failed: listMembers('".$list->ListID."', 'updated', '".$checkpoint->LastSuccessfulSync."', 0, 5000); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+            SS_Log::log("API Call Failed: listMembers('".$list->ListID."', 'updated', '".$checkpoint->LastSuccessfulSync."', 0, 5000); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
             return false;
         } else {
-            error_log($this->error_log_prefix()."API Call Success: listMembers('".$list->ListID."', 'updated', '".$checkpoint->LastSuccessfulSync."', 0, 5000); Returned Members = ".$retval['total']);
+            SS_Log::log("API Call Success: listMembers('".$list->ListID."', 'updated', '".$checkpoint->LastSuccessfulSync."', 0, 5000); Returned Members = ".$retval['total'], SS_Log::NOTICE);
 
         	if($retval['total'] > 0) {
         	    
@@ -229,15 +229,15 @@ class MCSync extends Controller {
                     // (i.e. E-mail Updated on MailChimp Would Otherwise Create New Sub Rather Than Update Existing)
                     $mcMember = $api->listMemberInfo($list->ListID, $member['email']);
                     if ($api->errorCode){ // (Should Always Return Data As Members Yet To Confirm Subscribption Shouldn't Be Returned in listMembers() But Just Incase Fall Back On E-mail)
-                    	error_log($this->error_log_prefix()." - API Call Failed: listMemberInfo('".$list->ListID."', '".$member['email']."'); Error Code = " . $api->errorCode . " | Error Message = " . $api->errorMessage);
+                    	SS_Log::log(" - API Call Failed: listMemberInfo('".$list->ListID."', '".$member['email']."'); Error Code = " . $api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                         $where .= "LOWER(\"Email\") = '".strtolower($member['email'])."'";
                     } else {
-                        error_log($this->error_log_prefix()." - API Call Success: listMemberInfo('".$list->ListID."', '".$member['email']."');");
+                        SS_Log::log(" - API Call Success: listMemberInfo('".$list->ListID."', '".$member['email']."');", SS_Log::NOTICE);
                         $where .= "\"MCMemberID\" = '".$mcMember['data'][0]['web_id']."'";  
                     }
                     
-                    error_log($this->error_log_prefix()." - MEMBER ".$member['email']." (MCID: ".$mcMember['data'][0]['web_id'].")");
-                    error_log($this->error_log_prefix()." - MailChimp Updated: ".$member['timestamp']);
+                    SS_Log::log(" - MEMBER ".$member['email']." (MCID: ".$mcMember['data'][0]['web_id'].")", SS_Log::NOTICE);
+                    SS_Log::log(" - MailChimp Updated: ".$member['timestamp'], SS_Log::NOTICE);
                     
             	    $dl = new DataList("MCSubscription");
             	    $sub = $dl->where($where)->first();
@@ -259,7 +259,7 @@ class MCSync extends Controller {
             	    // Setting Subscribed True Even If Its Already True Wont Do Any Harm Anyway
         	        $sub->setField("Subscribed", 1);
             	    
-            	    error_log($this->error_log_prefix()." - Site MC Data Updated: ".gmdate('Y-m-d H:i:s', strtotime($sub->LastEdited)));
+            	    SS_Log::log(" - Site MC Data Updated: ".gmdate('Y-m-d H:i:s', strtotime($sub->LastEdited)), SS_Log::NOTICE);
             	    
             	    /*
             	    // The Below If Should Never Return True If Exporting Data From The Website - Mail Chimp On Write(), Unless The API Call Were To Fail On Export 
@@ -267,21 +267,21 @@ class MCSync extends Controller {
             	    // Take $sub->LastEdited As A Marker For Last Time ANY Data Relating To This MCList Was Manually Updated 
             	    if(strtotime($sub->LastEdited) > strtotime($member['timestamp'])) {
             	        // MailChimp Data Has Been SuperSeded By More Recent Website Managed MailChimp Data Update (Skip Update)
-            	        error_log($this->error_log_prefix()." - Site MC Data Updated: ".$sub->LastEdited);
-            	        error_log($this->error_log_prefix()." - Data Superseded By Site MC Data");
+            	        SS_Log::log(" - Site MC Data Updated: ".$sub->LastEdited, SS_Log::WARN);
+            	        SS_Log::log(" - Data Superseded By Site MC Data", SS_Log::WARN);
             	        continue;
             	    }
             	    */
             	    
             	    // Push MCSubscription and (If Exists) Member Objects In To $class Array
             	    $Class['MCSubscription'] = $sub;
-            	    error_log($this->error_log_prefix()." - Subscriber ID = ".$sub->ID);
+            	    SS_Log::log(" - Subscriber ID = ".$sub->ID, SS_Log::NOTICE);
             	    
             	    if(!empty($relatedMember->ID)) { // getComponent() Returns an Empty Component if None Are Found (So Check For Existance of ID)
             	        $Class['Member'] = $relatedMember;
-            	        error_log($this->error_log_prefix()." - Related Member ID = ".$Class['Member']->ID);
+            	        SS_Log::log(" - Related Member ID = ".$Class['Member']->ID, SS_Log::NOTICE);
             	    } else {
-            	        error_log($this->error_log_prefix()." - No Related Member");
+            	        SS_Log::log(" - No Related Member", SS_Log::NOTICE);
             	    }
             	    
             	    // $mcMember Array Created Above When Doing listMemberInfo() Call
@@ -298,7 +298,7 @@ class MCSync extends Controller {
                                 $FieldName = $listFields[$mergeTag]['FieldName'];
                                 // If We Are Updating a 'Subscription' Object Which Has No Related Member $Class['Member'] Will Not Contain a Member Object (So Just Dump The Data)
                                 if(isset($Class[$ClassName]) && !empty($FieldName) && !empty($Value)){
-                                    error_log($this->error_log_prefix()." -- \$Class['".$ClassName."']->setField('".$FieldName."', '".$Value."');");
+                                    SS_Log::log(" -- \$Class['".$ClassName."']->setField('".$FieldName."', '".$Value."');", SS_Log::NOTICE);
                                     $Class[$ClassName]->setField($FieldName, $Value);
                                 }
                             }
@@ -329,7 +329,7 @@ class MCSync extends Controller {
     public function UpdateMemberStatus($list = null, $checkpoint = null) {
         
         if(!is_object($list) || !is_object($checkpoint)) {
-            error_log($this->error_log_prefix()."UpdateMemberStatus() Requireds MCList Object and Sync Checkpoint Parameters!");
+            SS_Log::log("UpdateMemberStatus() Requireds MCList Object and Sync Checkpoint Parameters!", SS_Log::ERR);
             return false;
         }
         
@@ -337,10 +337,10 @@ class MCSync extends Controller {
         
         $retval = $api->listMembers($list->ListID, 'unsubscribed', $checkpoint->LastSuccessfulSync, 0, 5000);
         if ($api->errorCode){
-            error_log($this->error_log_prefix()."API Call Failed: listMembers('".$list->ListID."', 'unsubscribed', '".$checkpoint->LastSuccessfulSync."', 0, 5000); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+            SS_Log::log("API Call Failed: listMembers('".$list->ListID."', 'unsubscribed', '".$checkpoint->LastSuccessfulSync."', 0, 5000); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
             return false;
         } else {
-            error_log($this->error_log_prefix()."API Call Success: listMembers('".$list->ListID."', 'unsubscribed', '".$checkpoint->LastSuccessfulSync."', 0, 5000); Returned Members = ".$retval['total']);
+            SS_Log::log("API Call Success: listMembers('".$list->ListID."', 'unsubscribed', '".$checkpoint->LastSuccessfulSync."', 0, 5000); Returned Members = ".$retval['total'], SS_Log::NOTICE);
         	
         	if($retval['total'] > 0) {   
             	
@@ -353,35 +353,35 @@ class MCSync extends Controller {
                     // Members Yet To Confirm Subscribption Shouldn't Be Returned in listMembers()
                     // listMemberInfo() Error Would Suggest The Record Has Been DELETED from MailChimp (Rather Than Just Unsubscribed)
                     if ($api->errorCode){
-                    	error_log($this->error_log_prefix()." - API Call Failed: listMemberInfo('".$list->ListID."', '".$member['email']."'); Error Code = " . $api->errorCode . " | Error Message = " . $api->errorMessage);
+                    	SS_Log::log(" - API Call Failed: listMemberInfo('".$list->ListID."', '".$member['email']."'); Error Code = " . $api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                         $where .= "LOWER(\"Email\") = '".strtolower($member['email'])."'";
                         $delete_record = true;
-                        error_log($this->error_log_prefix()."Member Record DELETED In MailChimp (Not Just Unsubscribed)");
+                        SS_Log::log("Member Record DELETED In MailChimp (Not Just Unsubscribed)", SS_Log::NOTICE);
                     } else {
-                        error_log($this->error_log_prefix()." - API Call Success: listMemberInfo('".$list->ListID."', '".$member['email']."');");
+                        SS_Log::log(" - API Call Success: listMemberInfo('".$list->ListID."', '".$member['email']."');", SS_Log::NOTICE);
                         $where .= "\"MCMemberID\" = '".$memberInfo['data'][0]['web_id']."'";
                         $delete_record = false;  
                     }
                     
-            	    error_log($this->error_log_prefix()." - MEMBER ".$member['email']." (MCID: ".$memberInfo['data'][0]['web_id'].")");
-                    error_log($this->error_log_prefix()." - MailChimp Updated: ".$member['timestamp']);
+            	    SS_Log::log(" - MEMBER ".$member['email']." (MCID: ".$memberInfo['data'][0]['web_id'].")", SS_Log::NOTICE);
+                    SS_Log::log(" - MailChimp Updated: ".$member['timestamp'], SS_Log::NOTICE);
             	    
             	    $dl = new DataList("MCSubscription");
             	    $sub = $dl->where($where)->first();
             	    
             	    if(!empty($sub) && !empty($delete_record)) { 
-            	        error_log($this->error_log_prefix()." - Subscriber ID = ".$sub->ID." Deleted!");
+            	        SS_Log::log(" - Subscriber ID = ".$sub->ID." Deleted!", SS_Log::NOTICE);
             	        $sub->setSyncMailChimp(false);
             	        $sub->delete();
             	    } else if (!empty($sub)) {
-            	        error_log($this->error_log_prefix()." - Subscriber ID = ".$sub->ID);
+            	        SS_Log::log(" - Subscriber ID = ".$sub->ID, SS_Log::NOTICE);
             	        $reason = (isset($member['reason_text']) && !empty($member['reason_text'])) ? $member['reason_text'] : $member['reason'];
             	        $sub->setField('Subscribed', 0);
             	        $sub->setField('UnsubscribeReason', $reason);
             	        $sub->setSyncMailChimp(false);
             	        $sub->write();
             	    } else {
-            	        error_log($this->error_log_prefix()."Member In MailChimp List (".$list->Name.") and marked as unsubscribed but has no related MCSubscription object! Perhaps The Subscription Record Was Deleted On The Site Rather Than Just Unsubscribed and the Sync is only just catching up?");
+            	        SS_Log::log("Member In MailChimp List (".$list->Name.") and marked as unsubscribed but has no related MCSubscription object! Perhaps The Subscription Record Was Deleted On The Site Rather Than Just Unsubscribed and the Sync is only just catching up?", SS_Log::WARN);
             	    }
             	    
             	} // END foreach($retval['data] as $member) { 
@@ -399,7 +399,7 @@ class MCSync extends Controller {
     public function UpdateSegments($list = null) {
         
         if(!is_object($list)) {
-            error_log($this->error_log_prefix()."UpdateSegments() Requireds a MCList Object Parameter!");
+            SS_Log::log("UpdateSegments() Requireds a MCList Object Parameter!", SS_Log::ERR);
             return false;
         }
         
@@ -407,10 +407,10 @@ class MCSync extends Controller {
         
         $retval = $api->listStaticSegments($list->ListID);
         if ($api->errorCode){
-            error_log($this->error_log_prefix()."API Call Failed: listStaticSegments('".$list->ListID."); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+            SS_Log::log("API Call Failed: listStaticSegments('".$list->ListID."); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
             return false;
         } else {
-            error_log($this->error_log_prefix()."API Call Success: listStaticSegments('".$list->ListID.");");
+            SS_Log::log("API Call Success: listStaticSegments('".$list->ListID.");", SS_Log::NOTICE);
             if(!empty($retval)) {
                 $LiveSegmentIDs = array();
                 foreach($retval as $segment) {
@@ -450,7 +450,7 @@ class MCSync extends Controller {
     public function CleanUpSubscriptionStatus($list = null) {
     
         if(!is_object($list)) {
-            error_log($this->error_log_prefix()."CleanUpSubscriptionStatus() Requireds MCList Object Parameter!");
+            SS_Log::log("CleanUpSubscriptionStatus() Requireds MCList Object Parameter!", SS_Log::ERR);
             return false;
         }
         
@@ -461,9 +461,9 @@ class MCSync extends Controller {
         // Get ALL Subscribed List Members
         $retval = $api->listMembers($list->ListID, 'subscribed', null, 0, 5000);
         if ($api->errorCode){
-            error_log($this->error_log_prefix()."API Call Failed: listMembers('".$list->ListID."', 'subscribed', null, 0, 5000); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+            SS_Log::log("API Call Failed: listMembers('".$list->ListID."', 'subscribed', null, 0, 5000); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
         } else {
-            error_log($this->error_log_prefix()."API Call Success: listMembers('".$list->ListID."', 'subscribed', null, 0, 5000); Returned Members = ".$retval['total']);
+            SS_Log::log("API Call Success: listMembers('".$list->ListID."', 'subscribed', null, 0, 5000); Returned Members = ".$retval['total'], SS_Log::NOTICE);
         	if($retval['total'] > 0) {
             	foreach($retval['data'] as $member){
                     $emails[] = strtolower($member['email']);
@@ -474,9 +474,9 @@ class MCSync extends Controller {
         // Get ALL Unsubscribed List Members
         $retval = $api->listMembers($list->ListID, 'unsubscribed', null, 0, 5000);
         if ($api->errorCode){
-            error_log($this->error_log_prefix()."API Call Failed: listMembers('".$list->ListID."', 'unsubscribed', null, 0, 5000); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+            SS_Log::log("API Call Failed: listMembers('".$list->ListID."', 'unsubscribed', null, 0, 5000); Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
         } else {
-            error_log($this->error_log_prefix()."API Call Success: listMembers('".$list->ListID."', 'unsubscribed', null, 0, 5000); Returned Members = ".$retval['total']);
+            SS_Log::log("API Call Success: listMembers('".$list->ListID."', 'unsubscribed', null, 0, 5000); Returned Members = ".$retval['total'], SS_Log::NOTICE);
         	if($retval['total'] > 0) {
             	foreach($retval['data'] as $member){
                     $emails[] = strtolower($member['email']);
@@ -519,5 +519,3 @@ class MCSync extends Controller {
     }
     
 }
-
-?>
