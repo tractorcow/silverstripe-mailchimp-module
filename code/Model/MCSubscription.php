@@ -136,7 +136,7 @@ class MCSubscription extends DataObject {
     }
     public function setOriginalChangedFields($arr) {
         if(!is_array($arr)) {
-            error_log("setOriginalChangedFields() Requires An Array Parameter!");
+            SS_Log::log("setOriginalChangedFields() Requires An Array Parameter!", SS_Log::WARN);
         }
         $this->_originalChangedFields = $arr;
     }
@@ -153,7 +153,7 @@ class MCSubscription extends DataObject {
         
     public function write(){
         
-        error_log("Write Iteration ".$this->getWriteCount());
+        SS_Log::log("Write Iteration ".$this->getWriteCount(), SS_Log::NOTICE);
 
 	    $cf = $this->getOriginalChangedFields(); 
 	             
@@ -219,11 +219,11 @@ class MCSubscription extends DataObject {
             
             if(!empty($this->getComponent("Member")->ID)) {
                 $Class['Member'] = $this->getComponent("Member");
-                error_log("Sub ID ".$this->ID." Has A Related Member Object..");
+                SS_Log::log("Sub ID ".$this->ID." Has A Related Member Object..", SS_Log::NOTICE);
             } else {
                 // If No Related Member Object Only Deal With Subscription Record Merge Data
                 $where .= " AND \"OnClass\" = 'MCSubscription'";
-                error_log("Sub ID ".$this->ID." Has No Related Member Object..");
+                SS_Log::log("Sub ID ".$this->ID." Has No Related Member Object..", SS_Log::NOTICE);
             }
 
             $dl = new DataList("MCListField");
@@ -239,38 +239,38 @@ class MCSubscription extends DataObject {
                 $result = $api->listSubscribe($list->ListID, $this->Email, $merge_vars, 'html', $this->DoubleOptIn);
                 // If Successfully Added a New Subscription Make a Second Call to Return the MailChimp Member (Web) && Email ID's
                 if(empty($api->errorCode)) {
-                    error_log("API Call Success: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID);
+                    SS_Log::log("API Call Success: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID, SS_Log::NOTICE);
                     $retval = $api->listMemberInfo($list->ListID, $this->Email);
                     if(empty($api->errorCode)){
-                        error_log("API Call Success: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID);
-                        error_log("Calling Additional write() for Subscription ID " . $this->ID." to Save MailChimp Created Data");
+                        SS_Log::log("API Call Success: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID, SS_Log::NOTICE);
+                        SS_Log::log("Calling Additional write() for Subscription ID " . $this->ID." to Save MailChimp Created Data", SS_Log::NOTICE);
                         $this->setField("MCMemberID", $retval['data'][0]['web_id']); // Set The MailChimp Member (Web) ID for this Member (Which Is Static - Used For MC - Site Imports)
                         $this->setField("MCEmailID", $retval['data'][0]['id']); // Set The MailChimp Email ID for this Member (Which Updates When E-mail Updates - Used For Site - MC Exports)
                         $this->setWriteCount();
                         $this->write();
                     } else {
-                        error_log("API Call Failed: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+                        SS_Log::log("API Call Failed: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                     }
                 } else {
-                    error_log("API Call Failed: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+                    SS_Log::log("API Call Failed: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 }
                 
             } else if(isset($cf['Subscribed']) && !empty($this->Subscribed)) { // If Just Re-Subscribed (This Will Replace Previous MC Record With New One Rather Than Re-Subscribing Existing)
      
                 $result = $api->listSubscribe($list->ListID, $this->Email, $merge_vars, 'html', $this->DoubleOptIn); // Must use E-mail For Re-Subscription as listSubscribe() assumes a new user (it actually deletes the existing 'un-subscribed' MailChimp record for the provided e-mail and re-adds the user)
                 if(empty($api->errorCode)){
-                    error_log("API Call Success: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID);
+                    SS_Log::log("API Call Success: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID, SS_Log::NOTICE);
                 } else {
-                    error_log("API Call Failed: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+                    SS_Log::log("API Call Failed: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 }
                 
             } else if(isset($cf['Subscribed']) && empty($this->Subscribed)) { // If Just Unsubscribed
                 
                 $result = $api->listUnsubscribe($list->ListID, $this->getMailChimpIdentifier());
                 if(empty($api->errorCode)){
-                    error_log("API Call Success: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID);
+                    SS_Log::log("API Call Success: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID, SS_Log::NOTICE);
                 } else {
-                    error_log("API Call Failed: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+                    SS_Log::log("API Call Failed: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 }
                 
             } else if(!empty($this->Subscribed)) { // If Updating an Existing Subscription (That Hasnt Already Unsubscribed)
@@ -278,37 +278,38 @@ class MCSubscription extends DataObject {
                 $result = $api->listUpdateMember($list->ListID, $this->getMailChimpIdentifier(), $merge_vars);
                 // If Successfully Updated a Subscription Make a Second Call to Return the MailChimp Member Email ID
                 if(empty($api->errorCode)) {
-                    error_log("API Call Success: listUpdateMember(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID);
+                    SS_Log::log("API Call Success: listUpdateMember(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID, SS_Log::NOTICE);
                     if(isset($cf['Email'])) {
                        $retval = $api->listMemberInfo($list->ListID, $this->Email); // Call Must Use Email As MCEmailID Will Be Outdated If Last Update Was An Email Change
                         if(empty($api->errorCode)){
-                            error_log("API Call Success: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID);
-                            error_log("Calling Additional write() for Subscription ID " . $this->ID." to Save Updated MailChimp Email ID");
+                            SS_Log::log("API Call Success: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID, SS_Log::NOTICE);
+                            SS_Log::log("Calling Additional write() for Subscription ID " . $this->ID." to Save Updated MailChimp Email ID", SS_Log::NOTICE);
                             $this->setField("MCEmailID", $retval['data'][0]['id']); // Update The MailChimp Email ID for this Member (Which Updates When E-mail Updates)
                             $this->setSyncMailChimp(false);
                             $this->write();
                         } else {
-                            error_log("API Call Failed: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+                            SS_Log::log("API Call Failed: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                         }    
                     }
                 } else {
-                    error_log("API Call Failed: listUpdateMember(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+                    SS_Log::log("API Call Failed: listUpdateMember(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 }    
                 
             } else {
                 
-                error_log("No API Call Made: Record Must Be Marked As Unsubscribed.");
+                SS_Log::log("No API Call Made: Record Must Be Marked As Unsubscribed.", SS_Log::NOTICE);
             
             }
                         
         } else {
-            error_log(
-            "In >=2 Write But No MailChimp Sync Triggered? " .
-            "Sub ID = '" . $this->ID . "' | " .
-            "Write Count = '" . $this->getWriteCount() . "' | " .
-    	    "Sync To MailChimp = '" . $this->getSyncMailChimp() . "' | " . 
-    	    "Subscriber E-mail = '" . $this->Email . "' | " .
-    	    "Related MC List ID = '" . $list->ID . "'"
+            SS_Log::log(
+                "In >=2 Write But No MailChimp Sync Triggered? " .
+                "Sub ID = '" . $this->ID . "' | " .
+                "Write Count = '" . $this->getWriteCount() . "' | " .
+        	    "Sync To MailChimp = '" . $this->getSyncMailChimp() . "' | " . 
+        	    "Subscriber E-mail = '" . $this->Email . "' | " .
+        	    "Related MC List ID = '" . $list->ID . "'",
+                SS_Log::WARN
     	    );
         }
         
@@ -338,9 +339,9 @@ class MCSubscription extends DataObject {
             $result = $api->listUnsubscribe($list->ListID, $this->getMailChimpIdentifier(), true);
     
             if($result) {
-                error_log("API Call Success: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier().", \$delete_member = true); for Subscription ID " . $this->ID);
+                SS_Log::log("API Call Success: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier().", \$delete_member = true); for Subscription ID " . $this->ID, SS_Log::NOTICE);
             } else {
-                error_log("API Call Failed: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier().", \$delete_member = true); for Subscription ID " . $this->ID . " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+                SS_Log::log("API Call Failed: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier().", \$delete_member = true); for Subscription ID " . $this->ID . " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
             }
              
         }

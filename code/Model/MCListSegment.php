@@ -86,9 +86,9 @@ class MCListSegment extends DataObject {
                 $api->listStaticSegmentAdd($list->ListID, $SegmentTitle); 
 
                 if($api->errorCode) {
-                    error_log("API Call Failed: listStaticSegmentAdd(); | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+                    SS_Log::log("API Call Failed: listStaticSegmentAdd(); | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 } else {
-                    error_log("API Call Success: listStaticSegmentAdd(); ");
+                    SS_Log::log("API Call Success: listStaticSegmentAdd();", SS_Log::NOTICE);
                     
                     // Make Second Call To Return MailChimp Segment ID
                     $segments = $api->listStaticSegments($list->ListID);
@@ -97,8 +97,8 @@ class MCListSegment extends DataObject {
                         $id_chars = strlen((string)$this->EventID);
                         $id = substr($segment['name'], 6, $id_chars);
                         if($id == $this->EventID) {
-                            error_log("This Event ID = ".$this->EventID.", Static Segment Named ".$segment['name']." Relates to Event ID ".$id);
-                            error_log("We Have a Match");
+                            SS_Log::log("This Event ID = ".$this->EventID.", Static Segment Named ".$segment['name']." Relates to Event ID ".$id, SS_Log::NOTICE);
+                            SS_Log::log("We Have a Match", SS_Log::NOTICE);
                             $this->setField("MCListSegmentID", $segment['id']);
                             $this->write();
                             break;
@@ -128,9 +128,9 @@ class MCListSegment extends DataObject {
         ) {
             $api->listStaticSegmentDel($list->ListID, $this->MCListSegmentID); 
             if($api->errorCode) {
-               error_log("API Call Failed: listStaticSegmentDel(); | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage);
+               SS_Log::log("API Call Failed: listStaticSegmentDel(); | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
             } else {
-               error_log("API Call Success: listStaticSegmentDel();");
+               SS_Log::log("API Call Success: listStaticSegmentDel();", SS_Log::NOTICE);
             }
         }
         
