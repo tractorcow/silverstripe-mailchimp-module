@@ -9,7 +9,9 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 0.1.1
 
 ## Features
+
 **List integration**
+
 * When users subscribe on the website or are manually added through SilverStripe, they will be added into the list in Mailchimp.
 * Anyone subscribing through the Mailchimp signup form will be added in the SilverStripe CMS (Mailchimp add a double opt-in process however, you can change the settings using the API).
 * Unsubscribes are synced when users unsubscribe from either platform
@@ -22,6 +24,7 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 * If a subscriber unsubscribes and tries to re-subscribe through the website, they will receive an error message. They will only be able to re-subscribe through Mailchimp’s sign up form with double opt-in confirmation email or admin can add the subscriber manually
 
 **Segmentation**
+
 * When an event page is created in SilverStripe, a static segment is created in Mailchimp
 * If you have more than one list, you can choose, through SilverStripe, which list or multiple lists you want the static segment to be created against in Mailchimp
 * When a user on the website clicks ‘attend’ on the website, they are added into the segment in Mailchimp & SilverStripe
