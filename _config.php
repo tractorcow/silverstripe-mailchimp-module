@@ -7,6 +7,7 @@
 
 // Extensions
 Object::add_extension('Member', 'MCMemberExtension');
+Object::add_extension('DataObject', 'DataObjectExtension');
 Object::add_extension('SiteConfig', 'MCSiteConfigExtension');
 
 // CMS Requirements
