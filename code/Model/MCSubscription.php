@@ -175,14 +175,14 @@ class MCSubscription extends DataObject {
     	    }
     	}
 
-        // On creation we must ensure the MCSubscription object is written twice
-        // as it is the second write (for components) where our MCSync logic is called
-        if(empty($this->ID)) {
+        // Ensure the MCSubscription object is always written twice as it is
+        // the second write (for components) where our MCSync logic is called
+        if($this->getWriteCount() < 2) {
             $this->setForceAdditionalWrite(true);
         }
 
         if($this->getForceAdditionalWrite()) {
-            // If a second write is being forced, ensure that DataObject::write()
+            // If an additional write is being forced, ensure that DataObject::write()
             // doesnt decide nothing needs saving and fails to call onAfterWrite()
             $this->DummyField = time();
         }
