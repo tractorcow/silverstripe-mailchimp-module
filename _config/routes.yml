@@ -1,0 +1,7 @@
+---
+Name: mailchimproutes
+After: framework/routes#coreroutes
+---
+Director:
+  rules:
+    'mailchimp//$Action': 'MCSync'

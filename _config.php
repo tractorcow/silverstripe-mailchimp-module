@@ -11,7 +11,7 @@ Object::add_extension('DataObject', 'DataObjectExtension');
 Object::add_extension('SiteConfig', 'MCSiteConfigExtension');
 
 // CMS Requirements
-LeftAndMain::require_javascript(__DIR__ . '/javascript/actions.js');
+LeftAndMain::require_javascript(basename(__DIR__) . '/javascript/actions.js');
 
 /**********************************/
 /* Logging Information and Errors */

@@ -7,20 +7,20 @@
 class MCSync_Checkpoint extends DataObject {
     
     public static $db = array(
-        "LastSuccessfulSync" => "SS_Datetime", // Stored in GMT Based on MailChimps API Server Time at Sync Start 
-        "MCListID" => "Varchar(255)"
+        "LastSuccessfulSync"    => "SS_Datetime", // Stored in GMT Based on MailChimps API Server Time at Sync Start
+        "MCListID"              => "Varchar(255)"
     );
     
 }
 
-class MCSync extends Controller {
+class MCSync extends ContentController {
     
     public static $allowed_actions = array(
-        'CleanUpSubscriptionStatus',
-        'UpdateLists',
-        'UpdateMemberData',
-        'UpdateMemberStatus',
-        'UpdateSegments'
+        'CleanUpSubscriptionStatus' => true,
+        'UpdateLists'               => true,
+        'UpdateMemberData'          => true,
+        'UpdateMemberStatus'        => true,
+        'UpdateSegments'            => true
     );
     
     public $apikey;

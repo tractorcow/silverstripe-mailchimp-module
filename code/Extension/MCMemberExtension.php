@@ -27,31 +27,29 @@ class MCMemberExtension extends DataExtension {
     public function updateCMSFields(FieldList $fields) {
         
         $fields->removeByName('MCSubscriptions');
-        
-        if($this->owner->InGroup('premium-members')) {
-            /* START SUBSCRIBERS GRIDFIELD */ 
-            $config = GridFieldConfig_RelationEditor::create();
-            $config->getComponentByType('GridFieldAddExistingAutocompleter')->setSearchFields(array("Email", "FirstName", "Surname"));
-            $config->getComponentByType('GridFieldAddExistingAutocompleter')->setResultsFormat('$Email ($FirstName $Surname)');
-            $config->getComponentByType('GridFieldAddNewButton')->setButtonName("Add Subscription");
-            $config->getComponentByType('GridFieldDataColumns')->setDisplayFields(array(
-    		      'MCListName' => 'MailChimp List Name',
-    		      'FirstName' => 'First Name',
-    		      'Surname' => 'Surname',
-    		      'Email' => 'E-mail',
-    		      'Subscribed' => 'Active Subscription',
-    		      'Created' => 'Created',
-      		      'LastEdited' => 'LastEdited'
-    		    ));
-    		    $l = new GridField(
-    		      'MCSubscriptions',
-    		      'MailChimp Subscriptions',
-    		      $this->owner->getComponents("MCSubscriptions", "", "\"MCListID\" ASC, \"Surname\" ASC, \"FirstName\" ASC, \"Email\" ASC"),
-    		      $config
-    		    );
-            $fields->addFieldToTab('Root.SubscriberRecords', $l);
-            /* FINISH MCLISTS GRIDFIELD */
-        } 
+
+        /* START SUBSCRIBERS GRIDFIELD */
+        $config = GridFieldConfig_RelationEditor::create();
+        $config->getComponentByType('GridFieldAddExistingAutocompleter')->setSearchFields(array("Email", "FirstName", "Surname"));
+        $config->getComponentByType('GridFieldAddExistingAutocompleter')->setResultsFormat('$Email ($FirstName $Surname)');
+        $config->getComponentByType('GridFieldAddNewButton')->setButtonName("Add Subscription");
+        $config->getComponentByType('GridFieldDataColumns')->setDisplayFields(array(
+		      'MCListName' => 'MailChimp List Name',
+		      'FirstName' => 'First Name',
+		      'Surname' => 'Surname',
+		      'Email' => 'E-mail',
+		      'Subscribed' => 'Active Subscription',
+		      'Created' => 'Created',
+  		      'LastEdited' => 'LastEdited'
+		    ));
+		    $l = new GridField(
+		      'MCSubscriptions',
+		      'MailChimp Subscriptions',
+		      $this->owner->getComponents("MCSubscriptions", "", "\"MCListID\" ASC, \"Surname\" ASC, \"FirstName\" ASC, \"Email\" ASC"),
+		      $config
+		    );
+        $fields->addFieldToTab('Root.SubscriberRecords', $l);
+        /* FINISH MCLISTS GRIDFIELD */
         
     }
         

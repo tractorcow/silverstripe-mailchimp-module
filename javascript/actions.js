@@ -13,6 +13,7 @@
                },
                error : function(xhr, status, errObj) {
                    alert("Error: Status = " + status);
+                   console.log(xhr);
                }    
            });
            return false; 
