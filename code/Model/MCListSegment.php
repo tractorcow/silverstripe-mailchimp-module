@@ -141,5 +141,3 @@ class MCListSegment extends DataObject {
     }
     
 }
-
-?>

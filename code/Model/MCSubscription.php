@@ -10,17 +10,18 @@ class MCSubscription extends DataObject {
 	private $_writeCount;
     private $_syncMailChimp;
     private $_originalChangedFields;
-    		
-	public static $db = array(
-	    'MCMemberID' => 'Int',
-	    'MCEmailID' => 'Varchar(255)',
-	    'FirstName' => 'Varchar(255)',
-	    'Surname' => 'Varchar(255)',
-		'Email' => 'Varchar(255)',
-		'Subscribed' => 'Boolean',
-		'UnsubscribeReason' => 'Varchar(255)',
-		'DoubleOptIn' => 'Boolean'
-	);
+    private $_forceAdditionalWrite;
+
+    public static $db = array(
+        'MCMemberID'            => 'Int',
+        'MCEmailID'             => 'Varchar(255)',
+        'FirstName'             => 'Varchar(255)',
+        'Surname'               => 'Varchar(255)',
+        'Email'                 => 'Varchar(255)',
+        'Subscribed'            => 'Boolean',
+        'UnsubscribeReason'     => 'Varchar(255)',
+        'DoubleOptIn'           => 'Boolean'
+    );
 	
 	public static $has_one = array(
 	    'Member' => 'Member',
@@ -173,12 +174,28 @@ class MCSubscription extends DataObject {
     	        throw new ValidationException($vr);
     	    }
     	}
-    	
+
+        // On creation we must ensure the MCSubscription object is written twice
+        // as it is the second write (for components) where our MCSync logic is called
+        if(empty($this->ID)) {
+            $this->setForceAdditionalWrite(true);
+        }
+
+        if($this->getForceAdditionalWrite()) {
+            // If a second write is being forced, ensure that DataObject::write()
+            // doesnt decide nothing needs saving and fails to call onAfterWrite()
+            $this->DummyField = time();
+        }
+
     	parent::write();
-    	
-    	// Do E-mail Comparison Set AFTER 1st Write 
-    	// Otherwise We Can Have All Subscriber Data Fields (inc Forign Key Fields) CAN be Writeen on the 1st Write,
-    	// Meaning the MailChimp Sync Logic Never Fires
+
+    	// Do E-mail Comparison and related member setting AFTER 1st Write
+    	// Otherwise, when saving existing subscriptions, we Can Have All
+        // Subscriber Data Fields (inc Forign Key Fields) Writen on the 1st Write,
+    	// Meaning when the second write() for components occours, DataObject::write()
+        // determins that nothing on the record has changed and does not call
+        // onAfterWrite() on the second write itteration meaning the MailChimp
+        // Sync Logic Never Fires
     	if(isset($cf["Email"])) {
     	    // Check For Related Member E-mails and Link to Member If Found
             $dl = new DataList("Member");
@@ -207,7 +224,7 @@ class MCSubscription extends DataObject {
     	    && !empty($this->Email) // We Must Have a Unique MailChimp Member Identifier
     	    && !empty($list->ID) // We Must Have a Unique MailChimp List Identifier
 	    ) {
-	        
+
 	        $apikey = SiteConfig::current_site_config()->getMCAPIKey();
             $api = new MCAPI($apikey);
             
@@ -237,9 +254,8 @@ class MCSubscription extends DataObject {
             foreach($mappings as $map) {
                 $merge_vars[$map->MergeTag] = $Class[$map->OnClass]->getField($map->FieldName);
             }
-            
+
             if(isset($cf['ID'])) { // If Adding a New Subscription
-                
                 $result = $api->listSubscribe($list->ListID, $this->Email, $merge_vars, 'html', $this->DoubleOptIn);
                 // If Successfully Added a New Subscription Make a Second Call to Return the MailChimp Member (Web) && Email ID's
                 if(empty($api->errorCode)) {
@@ -321,6 +337,12 @@ class MCSubscription extends DataObject {
         
         // If We Have Forced An Additional Write (Triggered When Saving Subscription Object Via Related Member Data Being Updated)
         if($this->getForceAdditionalWrite()) {
+            // Ensure that two complete (i.e. DataObject::write() doesnt decide
+            // nothing has actually changed and fails to call onAfterWrite())
+            // writes occour on creation as the second is responsible for
+            // syncing to MC. Setting a dummy field is a hack to fix broken write()
+            // function when passed $forceWrite (Does Not Actually Force a Write!)
+            $this->DummyField = time();
             // Unset It First So We Don't Keep Forcing Additional Writes Causing An Infinite Loop
             $this->setForceAdditionalWrite(false);
             // Write The Object Once More (For Benefit Of Sync Logic On Second Write)
@@ -350,9 +372,6 @@ class MCSubscription extends DataObject {
              
         }
 
-
     }
 	
 }
-
-?>

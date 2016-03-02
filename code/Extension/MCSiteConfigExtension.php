@@ -50,5 +50,3 @@ class MCSiteConfigExtension extends DataExtension {
     }
     
 }
-
-?>
