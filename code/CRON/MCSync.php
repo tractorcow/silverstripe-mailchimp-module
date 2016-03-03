@@ -7,20 +7,20 @@
 class MCSync_Checkpoint extends DataObject {
     
     public static $db = array(
-        "LastSuccessfulSync" => "SS_Datetime", // Stored in GMT Based on MailChimps API Server Time at Sync Start 
-        "MCListID" => "Varchar(255)"
+        "LastSuccessfulSync"    => "SS_Datetime", // Stored in GMT Based on MailChimps API Server Time at Sync Start
+        "MCListID"              => "Varchar(255)"
     );
     
 }
 
-class MCSync extends Controller {
+class MCSync extends ContentController {
     
     public static $allowed_actions = array(
-        'CleanUpSubscriptionStatus',
-        'UpdateLists',
-        'UpdateMemberData',
-        'UpdateMemberStatus',
-        'UpdateSegments'
+        'CleanUpSubscriptionStatus' => true,
+        'UpdateLists'               => true,
+        'UpdateMemberData'          => true,
+        'UpdateMemberStatus'        => true,
+        'UpdateSegments'            => true
     );
     
     public $apikey;
@@ -200,7 +200,9 @@ class MCSync extends Controller {
                     }
                     // Create DataList of All Existing MC List Fields Which Are No Longer Present In MailChimp (Old Merge Tags) and Delete Them
                     $dl = new DataList("MCListField");
-                    $dl->removeByFilter("\"MCListID\" = '".$l->ListID."' AND \"MergeTag\" NOT IN (".$this->arrayToCSV($currTags).")");
+                    $filter = "\"MCListID\" = '".$l->ID."' AND \"MergeTag\" NOT IN (".$this->arrayToCSV($currTags).")";
+                    SS_Log::log("Cleaning up historical merge fields. MCListField delete filter = '" . $filter . "'", SS_Log::NOTICE);
+                    $dl->removeByFilter($filter);
                 }
         	}	
         }

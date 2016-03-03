@@ -75,6 +75,4 @@ class MCListField extends DataObject {
         return $fieldnames;
     }
     
-} 
-
-?>
+}

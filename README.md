@@ -6,7 +6,7 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 
 
 ## Version
-0.1.2
+0.1.3
 
 ## Features
 
@@ -33,8 +33,10 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 
 ## Requirements
 ```
-silverstripe/cms: 3.1.x
+silverstripe/cms: 3.x
+silverstripe/gridfieldextensions: 1.x
 ```
+**Note:** GridField Extensions is only required for drag and drop row re-ordering
 
 ## Installation
 * Download the code base by either cloning this repository or downloading the provided .zip file
@@ -45,7 +47,8 @@ silverstripe/cms: 3.1.x
 * Log in to your websites CMS as an administrator and go to Settings > Mailchimp, here you can enter your API key and save
 * You can now 'Update Lists from Mailchimp' which will create a new MCList instance for each of your existing Mailchimp lists
 * For each list, click edit and go to the 'Field Mapping' tab, this allows you to map each merge field of your Mailchimp list to the appropriate DataObject i.e. Member | Subscriber) and Property (i.e. Last Name) and specify which direction data should be syncronised
-* Go back to Mailchimp and set up a web hook (see [Mailchimp's documentation](http://kb.mailchimp.com/integrations/other-integrations/how-to-set-up-webhooks)) which points to /MCSync (i.e. https://www.example.com/MCSync), ensure that the 'via the API' option **is not ticked** when setting up this web hook
+* Go back to Mailchimp and set up a web hook (see [Mailchimp's documentation](http://kb.mailchimp.com/integrations/other-integrations/how-to-set-up-webhooks)) which points to /mailchimp (i.e. https://www.example.com/mailchimp), ensure that the 'via the API' option **is not ticked** when setting up this web hook
+* In order to get in sync for the first time you may need to either: 1) run /mailchimp/MCSync if you already have populated Mailchimp list(s) and have no kind of subscriber records stored on your website. 2) Write a script to create a new MCSubscription object and relate it to each of your Member objects.
 * You can verify that the module is installed correctly by adding a new Subscriber or Member in your websites CMS and/or creating or updating a test record in your Mailchimp list
 
 ## Troubleshooting
@@ -63,6 +66,7 @@ Joe Harvey <[joe.harvey@quadradigital.co.uk](mailto:joe.harvey@quadradigital.co.
 Ping Ho <[ping.ho@quadradigital.co.uk](mailto:ping.ho@quadradigital.co.uk)>
 
 ### To Do
+* Ensure the HTTP header 'X-Robots-Tag: noindex' is added to all responses from the MCSync controller class (to prevent these URL's being indexed for search)
 * Rather Attempting to Add Subscriber to List Only On Subscriber Creation, Try Adding Whenever The Subscriber Has No MC Member ID (Incase A Sync Fails On Creation)
 * Amend MCSync Script to Be On a Single List Basis, for Use With MailChimp Webhooks
 * Allow For List Creation On Website (And Sync To MailChimp)
