@@ -200,7 +200,9 @@ class MCSync extends ContentController {
                     }
                     // Create DataList of All Existing MC List Fields Which Are No Longer Present In MailChimp (Old Merge Tags) and Delete Them
                     $dl = new DataList("MCListField");
-                    $dl->removeByFilter("\"MCListID\" = '".$l->ListID."' AND \"MergeTag\" NOT IN (".$this->arrayToCSV($currTags).")");
+                    $filter = "\"MCListID\" = '".$l->ID."' AND \"MergeTag\" NOT IN (".$this->arrayToCSV($currTags).")";
+                    SS_Log::log("Cleaning up historical merge fields. MCListField delete filter = '" . $filter . "'", SS_Log::NOTICE);
+                    $dl->removeByFilter($filter);
                 }
         	}	
         }
