@@ -5,10 +5,10 @@
  * To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/.
  */
 class MCMemberExtension extends DataExtension {
-    
+
     private $_firstWrite;
     private $_syncMailChimp;
-    
+
     // Setters & Getters for SynvMail Chimp (Defaults to true)
     public function setSyncMailChimp($sync = false) {
         $this->_syncMailChimp = (empty($sync)) ? false : true;
@@ -19,13 +19,17 @@ class MCMemberExtension extends DataExtension {
         }
         return $this->_syncMailChimp;
     }
-    
+
     public static $has_many = array(
         'MCSubscriptions' => 'MCSubscription'
     );
-    
+
+    private static $many_many = array(
+        'Events'    => 'Event'
+    );
+
     public function updateCMSFields(FieldList $fields) {
-        
+
         $fields->removeByName('MCSubscriptions');
 
         /* START SUBSCRIBERS GRIDFIELD */
@@ -50,9 +54,9 @@ class MCMemberExtension extends DataExtension {
 		    );
         $fields->addFieldToTab('Root.SubscriberRecords', $l);
         /* FINISH MCLISTS GRIDFIELD */
-        
+
     }
-        
+
     public function setSubscriptionData($subID, $data) {
         $sub = $this->owner->getComponents("MCSubscriptions", "\"ID\" = '".$subID."'")->first();
         foreach($data as $key => $val) {
@@ -61,7 +65,7 @@ class MCMemberExtension extends DataExtension {
         $sub->setForceAdditionalWrite(true);
         $sub->write();
     }
-    
+
     //OnBeforeWrite Flag Getter/Setter Functions
 	public function getFirstWrite() {
 	   if(isset($this->_firstWrite)) {
@@ -72,13 +76,13 @@ class MCMemberExtension extends DataExtension {
 	public function setFirstWrite($state = false) {
 	    $this->_firstWrite = $state;
 	}
-	    	
+
 	public function onBeforeWrite() {
 
 	    parent::onBeforeWrite();
 
 	}
-	
+
     public function onAfterWrite() {
 
         parent::onAfterWrite();
