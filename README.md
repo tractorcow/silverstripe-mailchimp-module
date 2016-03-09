@@ -4,14 +4,11 @@ The Silverstripe Mailchimp Module enables you to keep your Mailchimp mailing lis
 The module can be used with subscribers only or can offer a deeper integration with Silverstripe's pre-existing Member object through the use of a DataExtension.
 The module syncs data both ways (this can be managed on a field by field basis) so you can rest assured that your data is the same in both systems regardless of wether your users are updating their records via Mailchimp or via your website.
 
-
 ## Version
-0.1.4
+0.1.5
 
 ## Features
-
-**List integration**
-
+### List integration
 * When users subscribe on the website or are manually added through SilverStripe, they will be added into the list in Mailchimp.
 * Anyone subscribing through the Mailchimp signup form will be added in the SilverStripe CMS (Mailchimp add a double opt-in process however, you can change the settings using the API).
 * Unsubscribes are synced when users unsubscribe from either platform
@@ -23,8 +20,7 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 * When a member re-subscribes to email marketing on the website, they are added back into the list in SilverStripe and in Mailchimp
 * If a subscriber unsubscribes and tries to re-subscribe through the website, they will receive an error message. They will only be able to re-subscribe through Mailchimp’s sign up form with double opt-in confirmation email or admin can add the subscriber manually
 
-**Segmentation**
-
+### Segmentation
 * When an event page is created in SilverStripe, a static segment is created in Mailchimp
 * If you have more than one list, you can choose, through SilverStripe, which list or multiple lists you want the static segment to be created against in Mailchimp
 * When a user on the website clicks ‘attend’ on the website, they are added into the segment in Mailchimp & SilverStripe
@@ -32,15 +28,13 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 * When someone decides to un-attend, they will be removed from the static segment in both SilverStripe and Mailchimp
 
 ## Requirements
-```
-silverstripe/cms: 3.x
-silverstripe/gridfieldextensions: 1.x
-```
+[`silverstripe/cms: 3.x`](https://github.com/silverstripe/silverstripe-cms/tree/3)
+[`silverstripe/gridfieldextensions: 1.x`](https://github.com/silverstripe-australia/silverstripe-gridfieldextensions/tree/1.0)
 **Note:** GridField Extensions is only required for drag and drop row re-ordering
 
 ## Installation
 * Download the code base by either cloning this repository or downloading the provided .zip file
-* You can name the module directory whatever you like, we reccomend silverstripe-mailchimp-module
+* You can name the module directory whatever you like, we reccomend mailchimp-module
 * Place the module directory in the sites web root (i.e. at the same level as /mysite)
 * Run a /dev/build and /?flush=all against the website
 * Log in to your Mailchimp account and generate a new API key (see [Mailchimp's documentation](http://kb.mailchimp.com/accounts/management/about-api-keys))
@@ -58,14 +52,9 @@ The module will create a directory to hold logs in your websites /assets folder 
 This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
 To view a copy of this license, visit [http://creativecommons.org/licenses/by-nc/4.0/](http://creativecommons.org/licenses/by-nc/4.0/).
 
-## Contact
-This module is built by [Quadra Digital](https://www.quadradigital.co.uk) and has been made open source for free, we are unlikly to be able to offer much support however if you have any queries regarding usage, licencing, bugs or improvements please use one of the appropriate contact below.
-#### Technical
-Joe Harvey <[joe.harvey@quadradigital.co.uk](mailto:joe.harvey@quadradigital.co.uk)>
-#### Administrative
-Ping Ho <[ping.ho@quadradigital.co.uk](mailto:ping.ho@quadradigital.co.uk)>
-
+##Roadmap
 ### To Do
+* Add support for _dev only_ API keys to avoid having your development environment overwriting production lists
 * Ensure the HTTP header 'X-Robots-Tag: noindex' is added to all responses from the MCSync controller class (to prevent these URL's being indexed for search)
 * Rather Attempting to Add Subscriber to List Only On Subscriber Creation, Try Adding Whenever The Subscriber Has No MC Member ID (Incase A Sync Fails On Creation)
 * Amend MCSync Script to Be On a Single List Basis, for Use With MailChimp Webhooks
@@ -77,3 +66,10 @@ Ping Ho <[ping.ho@quadradigital.co.uk](mailto:ping.ho@quadradigital.co.uk)>
 ### Known Issues
 * Deleting a Record On MailChimp (As An Admin) Does Not Mark The Record As Unsubscribed, You Must Unsubscribe Record, Sync To Site, Then Later Delete
 * If A MailChimp Record Is Unsubscribed (via MailChimp Side) And That Subscription Is Added To A Static Segment (i.e. Before The Website Has Been Brought Back In Sync With MailChimp) The API Call Will Succeed But If Calling Action Via AJAX The AJAX Call Itself Will Return An Error (i.e Won't Get In To You success() Function) Due To Warning On Line 2886 of MCAPI.class.php
+
+## Contact
+This module is built by [Quadra Digital](https://www.quadradigital.co.uk) and has been made open source for free, we are unlikly to be able to offer much support however if you have any queries regarding usage, licencing, bugs or improvements please use one of the appropriate contact below.
+#### Technical
+Joe Harvey <[joe.harvey@quadradigital.co.uk](mailto:joe.harvey@quadradigital.co.uk)>
+#### Administrative
+Ping Ho <[ping.ho@quadradigital.co.uk](mailto:ping.ho@quadradigital.co.uk)>
