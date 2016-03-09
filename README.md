@@ -6,7 +6,7 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 
 
 ## Version
-0.1.3
+0.1.4
 
 ## Features
 
