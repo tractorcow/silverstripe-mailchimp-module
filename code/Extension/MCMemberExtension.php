@@ -23,7 +23,11 @@ class MCMemberExtension extends DataExtension {
     public static $has_many = array(
         'MCSubscriptions' => 'MCSubscription'
     );
-    
+
+    private static $many_many = array(
+        'Events'    => 'Event'
+    );
+
     public function updateCMSFields(FieldList $fields) {
 
         $fields->removeByName('MCSubscriptions');
