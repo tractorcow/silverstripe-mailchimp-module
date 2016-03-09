@@ -4,9 +4,6 @@ The Silverstripe Mailchimp Module enables you to keep your Mailchimp mailing lis
 The module can be used with subscribers only or can offer a deeper integration with Silverstripe's pre-existing Member object through the use of a DataExtension.
 The module syncs data both ways (this can be managed on a field by field basis) so you can rest assured that your data is the same in both systems regardless of wether your users are updating their records via Mailchimp or via your website.
 
-## Version
-0.1.5
-
 ## Features
 ### List integration
 * When users subscribe on the website or are manually added through SilverStripe, they will be added into the list in Mailchimp.
@@ -29,13 +26,20 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 
 ## Requirements
 [`silverstripe/cms: 3.x`](https://github.com/silverstripe/silverstripe-cms/tree/3)
+
 [`silverstripe/gridfieldextensions: 1.x`](https://github.com/silverstripe-australia/silverstripe-gridfieldextensions/tree/1.0)
-**Note:** GridField Extensions is only required for drag and drop row re-ordering
 
 ## Installation
+### Composer
+```bash
+composer require quadra-digital/silverstripe-mailchimp-module
+```
+### Manual
 * Download the code base by either cloning this repository or downloading the provided .zip file
 * You can name the module directory whatever you like, we reccomend mailchimp-module
 * Place the module directory in the sites web root (i.e. at the same level as /mysite)
+
+## Configuration
 * Run a /dev/build and /?flush=all against the website
 * Log in to your Mailchimp account and generate a new API key (see [Mailchimp's documentation](http://kb.mailchimp.com/accounts/management/about-api-keys))
 * Log in to your websites CMS as an administrator and go to Settings > Mailchimp, here you can enter your API key and save
