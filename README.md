@@ -5,7 +5,7 @@ The module can be used with subscribers only or can offer a deeper integration w
 The module syncs data both ways (this can be managed on a field by field basis) so you can rest assured that your data is the same in both systems regardless of wether your users are updating their records via Mailchimp or via your website.
 
 ## Version
-0.1.4
+0.1.5
 
 ## Features
 ### List integration
