@@ -99,6 +99,11 @@ class MCEvent_Controller extends ContentController {
         'RemoveAttendee'
     );
 
+    public function init() {
+        parent::init();
+        $this->getResponse()->addHeader("X-Robots-Tag", "noindex");
+    }
+
     public static function AddAttendee($mid = false, $eid = false, $CalledStatically = false) {
 
         if(empty($eid) || !is_int($eid)) {

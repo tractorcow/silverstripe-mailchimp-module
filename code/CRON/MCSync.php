@@ -28,6 +28,9 @@ class MCSync extends ContentController {
     // Redirect Any Non-Authorised Access And Set API Key Field
     public function init() {
         parent::init();
+
+        $this->getResponse()->addHeader("X-Robots-Tag", "noindex");
+
         // Define API Key
         $this->apikey = SiteConfig::current_site_config()->getMCAPIKey();
         // Quit here if no API key available
