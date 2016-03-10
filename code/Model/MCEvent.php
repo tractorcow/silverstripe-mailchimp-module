@@ -62,7 +62,7 @@ class MCEvent extends Event {
 
         parent::onAfterWrite();
 
-        // On Event Creation Instanciate New MCListSegment Object(s) 
+        // On Event Creation Instanciate New MCListSegment Object(s)
         if($this->isChanged("ID") && $this->getFirstWrite()) {
            if(!empty($this->_AffectedMCListIDs)) {
                $ListData = explode(',', $this->_AffectedMCListIDs);
@@ -100,29 +100,29 @@ class MCEvent_Controller extends ContentController {
     );
 
     public static function AddAttendee($mid = false, $eid = false, $CalledStatically = false) {
-                
+
         if(empty($eid) || !is_int($eid)) {
             $eid = Controller::curr()->getRequest()->param('ID');
         }
-        
+
         if(empty($mid) || !is_int($mid)) {
             $mid = Member::currentUserID();
         }
-        
+
         $member = DataObject::get_by_id("Member", $mid);
         $event = DataObject::get_by_id('Event', $eid);
         $response = array();
-        
+
         if(!empty($member) && is_object($member)) {
 
             if(is_object($event) && !empty($event)) {
-                
+
                 // Get a ManyManyList of This Members Events
                 $membersEvents = $member->getMyManyManyComponents('Events');
-                
+
                 // See if This Event is Already in The Members Event List
                 $existing = $membersEvents->byID($eid);
-                
+
                 if(!empty($existing)) {
                      // Store Response
                     $response['error'] = "This Member is Already Attending Event ID ".$eid."!";
@@ -130,12 +130,12 @@ class MCEvent_Controller extends ContentController {
                 } else {
                     // Add Event to Members Event List
                     $membersEvents->add($event);
-                    
+
                     // Store Response
                     $response['error'] = false;
                     $response['error_code'] = 0;
                 }
-                
+
             } else {
                 // Store Response
                 $response['error'] = "No Event Found for Event ID ".$eid."!";
@@ -147,7 +147,7 @@ class MCEvent_Controller extends ContentController {
             $response['error'] = "No Member Found for Member ID ".$mid."!";
             $response['error_code'] = 3;
         }
-        
+
         // Return a JSON object if method is called via AJAX otherwise redirect back to calling page on success and show user_error on error
         if(Director::is_ajax()) {
             echo json_encode($response, JSON_FORCE_OBJECT);
