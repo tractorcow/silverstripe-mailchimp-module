@@ -58,8 +58,6 @@ To view a copy of this license, visit [http://creativecommons.org/licenses/by-nc
 
 ##Roadmap
 ### To Do
-* Add support for _dev only_ API keys to avoid having your development environment overwriting production lists
-* Ensure the HTTP header 'X-Robots-Tag: noindex' is added to all responses from the MCSync controller class (to prevent these URL's being indexed for search)
 * Rather Attempting to Add Subscriber to List Only On Subscriber Creation, Try Adding Whenever The Subscriber Has No MC Member ID (Incase A Sync Fails On Creation)
 * Amend MCSync Script to Be On a Single List Basis, for Use With MailChimp Webhooks
 * Allow For List Creation On Website (And Sync To MailChimp)
