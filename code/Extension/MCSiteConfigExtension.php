@@ -15,7 +15,15 @@ class MCSiteConfigExtension extends DataExtension {
     );
 
     public function getMCAPIKey() {
-        return ($this->owner->getField("MCApiKey")) ? $this->owner->getField("MCApiKey") : false;
+
+        if (Director::isDev()) {
+            $key = (null !== $this->owner->config()->get('DevAPIKey')) ? $this->owner->config()->get('DevAPIKey') : false;
+        } else {
+            $key = ($this->owner->getField("MCApiKey")) ? $this->owner->getField("MCApiKey") : false;
+        }
+
+        return $key;
+
     }
 
     public function updateCMSFields(FieldList $fields) {
