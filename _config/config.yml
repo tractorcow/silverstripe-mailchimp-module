@@ -1,0 +1,13 @@
+---
+Name: mailchimp-module
+---
+# MailChimp Module configuration
+Member:
+  extensions:
+    - 'MCMemberExtension'
+DataObject:
+  extensions:
+    - 'DataObjectExtension'
+SiteConfig:
+  extensions:
+    - 'MCSiteConfigExtension'
