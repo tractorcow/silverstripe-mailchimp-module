@@ -12,4 +12,4 @@ SiteConfig:
   extensions:
     - 'MCSiteConfigExtension'
   ## Set a different key for when the site is in dev mode
-  DevAPIKey: 'a594818be3bdbee1ff4907755280473b-us12s'
+  DevAPIKey: '<Your dev API key>'
