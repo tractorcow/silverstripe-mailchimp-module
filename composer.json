@@ -15,7 +15,7 @@
     "extra": {
         "installer-name": "mailchimp-module"
     },
-    "license": "CC-BY-NC-4.0",
+    "license": "BSD-3-Clause",
     "authors": [
         {
             "name": "Joe Harvey",

@@ -1,9 +1,6 @@
 <?php
 
 /**
- * This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
- * To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/.
- *
  * Extending the ManyManyList Class in Order to Add Hooks in the add()/remove() Methods Which Trigger Logic When Two DataObjects Have a Relationship Created/Destroyed
  * @TODO
  * - Capture The Appropriate Pair of Objects in the add()/remove() methods
