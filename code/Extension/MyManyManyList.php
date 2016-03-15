@@ -6,7 +6,7 @@
  * @todo
  * - Capture The Appropriate Pair of Objects in the add()/remove() methods
  * - Move the onLink() and onUnlink() methods in to the DataObject Extension
- * - Pass The A Object to the B Object onLink()/onUnlink() Method (e.g. in add() - $event->onLink($member); $member->onLink($event);) 
+ * - Pass The A Object to the B Object onLink()/onUnlink() Method (e.g. in add() - $event->onLink($member); $member->onLink($event);)
  *
 */
 class MyManyManyList extends ManyManyList{
@@ -107,7 +107,7 @@ class MyManyManyList extends ManyManyList{
 	        foreach($segments as $segment) {
 	            $list = $segment->getComponent("MCList");
 	            // Get All Subscription Records This Member Has For This List
-	            // The Fact That This Could Include Subscriptions Which Arnt Actually In This Static Segment 
+	            // The Fact That This Could Include Subscriptions Which Arnt Actually In This Static Segment
 	            // (i.e Unsubscribed Subs and/or Newly Added Subs Since SegmentMembersAdd() Was Run)
 	            // Means We Are Liable To Get API Call Erros, They Should Not Do Any Harm Though
 	            $subs = $member->getComponents("MCSubscriptions", "\"MCListID\" = '".$list->ID."'");

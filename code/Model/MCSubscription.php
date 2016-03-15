@@ -1,7 +1,7 @@
-<?php 
+<?php
 
 class MCSubscription extends DataObject {
-	
+
 	private $_firstWrite;
 	private $_writeCount;
     private $_syncMailChimp;
@@ -18,24 +18,24 @@ class MCSubscription extends DataObject {
         'UnsubscribeReason'     => 'Varchar(255)',
         'DoubleOptIn'           => 'Boolean'
     );
-	
+
 	public static $has_one = array(
 	    'Member' => 'Member',
 	    'MCList' => 'MCList'
 	);
-	
+
 	public static $defaults = array(
 	   'Subscribed' => 1,
 	   'DoubleOptIn' => 0
 	);
-	
+
 	public function getCMSFields() {
-	    
+
 	    $fields = parent::getCMSFields();
-	    
+
 	    // Validate The Fact That an Actual E-mail Has Been Used
 	    $fields->replaceField("Email", new EmailField("Email", "Email"));
-	    
+
         $fields->removeByName('DoubleOptIn');
         $fields->removeByName('MCMemberID');
         $fields->removeByName('MCListID');
@@ -46,46 +46,46 @@ class MCSubscription extends DataObject {
 	    if(empty($this->UnsubscribeReason)) {
 	        $fields->removeByName('UnsubscribeReason');
 	    }
-	    
+
 	    $lists = new DataList("MCList");
 	    $lists->sort("\"MCList\".\"Name\" ASC");
 	    $map = $lists->map("ID", "Name");
 	    $mcListID = new DropdownField('MCListID', 'MailChimp List', $map);
-	     
-	    // Calculate What Parent Object We Are Adding This Subscription record Under (A Specific MCList or A Member) 
+
+	    // Calculate What Parent Object We Are Adding This Subscription record Under (A Specific MCList or A Member)
 	    $params = Director::get_current_page()->getURLParams();
-	    $FormParentObject = end($params); 
+	    $FormParentObject = end($params);
 	    // If Already Set Don't Allow It To Be Modified
 	    if(!empty($this->MCListID)) {
 	         $mcListID = $mcListID->performReadonlyTransformation();
 	    }
 	    // If Already Set And Read Only Or If Unset But Adding Subscription Record Under Member Object Show The MCListID Filed
 	    if(!empty($this->MCListID) || $FormParentObject == "Members") {
-	        $fields->addFieldToTab('Root.Main', $mcListID); 
+	        $fields->addFieldToTab('Root.Main', $mcListID);
         }
-        
+
 	    $MCMemberID = new TextField('MCMemberID', 'MailChimp Member ID');
 	    $MCMemberID = $MCMemberID->performReadonlyTransformation();
-	    
+
 	    $MCEmailID = new TextField('MCEmailID', 'MailChimp Email ID');
 	    $MCEmailID = $MCEmailID->performReadonlyTransformation();
-	    
+
 	    $fields->addFieldToTab('Root.Main', $MCMemberID, 'FirstName');
 	    $fields->addFieldToTab('Root.Main', $MCEmailID, 'FirstName');
-	    
+
 	    return $fields;
-	    
+
 	}
-	
+
 	public function IsSubscribed() {
         $status = $this->getField("Subscribed");
         return (!empty($status)) ? true : false;
     }
-    
+
 	public function getMCListName() {
 	    return $this->getComponent("MCList")->getField("Name");
 	}
-	
+
 	// Try and Use MailChimp Generated E-mail Based ID For All listUpdateMember() and listUnsubscribe() Calls
     // Fall Back On E-mail (Needed To Match Up MC Record When Email Updated On Site) Return False If Both Empty
 	public function getMailChimpIdentifier() {
@@ -95,7 +95,7 @@ class MCSubscription extends DataObject {
             return (!empty($this->Email)) ? $this->Email : false;
         }
 	}
-	
+
 	// Setters & Getters for Is First Write Logic (Defaults to true)
 	public function getFirstWrite() {
 	   if(isset($this->_firstWrite)) {
@@ -151,13 +151,13 @@ class MCSubscription extends DataObject {
     public function setForceAdditionalWrite($state = false) {
         $this->_forceAdditionalWrite = $state;
     }
-        
+
     public function write(){
-        
+
         SS_Log::log("Write Iteration ".$this->getWriteCount(), SS_Log::NOTICE);
 
-	    $cf = $this->getOriginalChangedFields(); 
-	             
+	    $cf = $this->getOriginalChangedFields();
+
 	    // Only Do 'Email Already Exists' Check If E-mail Has Changed
 	    if(isset($cf["Email"])) {
 	        // Check If The Updated E-mail Is In Use
@@ -200,14 +200,14 @@ class MCSubscription extends DataObject {
                 $this->setField("MemberID", $relatedMember->ID);
             }
 	    }
-	    
+
 	}
-	    
+
     public function onAfterWrite() {
-        
+
         parent::onAfterWrite();
-        
-        // Define Related MCList Object 
+
+        // Define Related MCList Object
         $list = $this->getComponent("MCList");
 
         // Store The True Changed Fields Array On First Write
@@ -223,17 +223,17 @@ class MCSubscription extends DataObject {
 
 	        $apikey = SiteConfig::current_site_config()->getMCAPIKey();
             $api = new MCAPI($apikey);
-            
+
             // Define The Change Fields Array Which We Stored On The First Write Iteration For Use On The Second Write (When Components Are Written)
             if($this->getWriteCount() == 2) {
                 $cf = $this->getOriginalChangedFields();
             }
-            
+
             $Class = array();
             $Class["MCSubscription"] = $this;
 
             $where = "\"MCListID\" = '".$this->MCListID."' AND \"SyncDirection\" IN ('Export','Both')";
-            
+
             if(!empty($this->getComponent("Member")->ID)) {
                 $Class['Member'] = $this->getComponent("Member");
                 SS_Log::log("Sub ID ".$this->ID." Has A Related Member Object..", SS_Log::NOTICE);
@@ -270,27 +270,27 @@ class MCSubscription extends DataObject {
                 } else {
                     SS_Log::log("API Call Failed: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 }
-                
+
             } else if(isset($cf['Subscribed']) && !empty($this->Subscribed)) { // If Just Re-Subscribed (This Will Replace Previous MC Record With New One Rather Than Re-Subscribing Existing)
-     
+
                 $result = $api->listSubscribe($list->ListID, $this->Email, $merge_vars, 'html', $this->DoubleOptIn); // Must use E-mail For Re-Subscription as listSubscribe() assumes a new user (it actually deletes the existing 'un-subscribed' MailChimp record for the provided e-mail and re-adds the user)
                 if(empty($api->errorCode)){
                     SS_Log::log("API Call Success: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID, SS_Log::NOTICE);
                 } else {
                     SS_Log::log("API Call Failed: listSubscribe(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 }
-                
+
             } else if(isset($cf['Subscribed']) && empty($this->Subscribed)) { // If Just Unsubscribed
-                
+
                 $result = $api->listUnsubscribe($list->ListID, $this->getMailChimpIdentifier());
                 if(empty($api->errorCode)){
                     SS_Log::log("API Call Success: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID, SS_Log::NOTICE);
                 } else {
                     SS_Log::log("API Call Failed: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 }
-                
+
             } else if(!empty($this->Subscribed)) { // If Updating an Existing Subscription (That Hasnt Already Unsubscribed)
-                
+
                 $result = $api->listUpdateMember($list->ListID, $this->getMailChimpIdentifier(), $merge_vars);
                 // If Successfully Updated a Subscription Make a Second Call to Return the MailChimp Member Email ID
                 if(empty($api->errorCode)) {
@@ -305,32 +305,32 @@ class MCSubscription extends DataObject {
                             $this->write();
                         } else {
                             SS_Log::log("API Call Failed: listMemberInfo(".$list->ListID.", ".$this->Email."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
-                        }    
+                        }
                     }
                 } else {
                     SS_Log::log("API Call Failed: listUpdateMember(".$list->ListID.", ".$this->getMailChimpIdentifier()."); for Subscription ID " . $this->ID. " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
-                }    
-                
+                }
+
             } else {
-                
+
                 SS_Log::log("No API Call Made: Record Must Be Marked As Unsubscribed.", SS_Log::NOTICE);
-            
+
             }
-                        
+
         } else {
             SS_Log::log(
                 "In >=2 Write But No MailChimp Sync Triggered? " .
                 "Sub ID = '" . $this->ID . "' | " .
                 "Write Count = '" . $this->getWriteCount() . "' | " .
-        	    "Sync To MailChimp = '" . $this->getSyncMailChimp() . "' | " . 
+        	    "Sync To MailChimp = '" . $this->getSyncMailChimp() . "' | " .
         	    "Subscriber E-mail = '" . $this->Email . "' | " .
         	    "Related MC List ID = '" . $list->ID . "'",
                 SS_Log::WARN
     	    );
         }
-        
+
         $this->setWriteCount();
-        
+
         // If We Have Forced An Additional Write (Triggered When Saving Subscription Object Via Related Member Data Being Updated)
         if($this->getForceAdditionalWrite()) {
             // Ensure that two complete (i.e. DataObject::write() doesnt decide
@@ -344,30 +344,30 @@ class MCSubscription extends DataObject {
             // Write The Object Once More (For Benefit Of Sync Logic On Second Write)
             $this->write();
         }
-        
+
     }
-    
+
     public function onAfterDelete() {
-        
+
         // If Deletion Is Triggered By A Sync Where The Record Has Already Been Deleted In MC The Sync Flag Will Be False
         if($this->getSyncMailChimp()) {
-            
+
             $apikey = SiteConfig::current_site_config()->getMCAPIKey();
             $api = new MCAPI($apikey);
-    
-            // Define Related MCList Object 
+
+            // Define Related MCList Object
             $list = $this->getComponent("MCList");
             // Execute the Unsubscribe Call
             $result = $api->listUnsubscribe($list->ListID, $this->getMailChimpIdentifier(), true);
-    
+
             if($result) {
                 SS_Log::log("API Call Success: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier().", \$delete_member = true); for Subscription ID " . $this->ID, SS_Log::NOTICE);
             } else {
                 SS_Log::log("API Call Failed: listUnsubscribe(".$list->ListID.", ".$this->getMailChimpIdentifier().", \$delete_member = true); for Subscription ID " . $this->ID . " | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
             }
-             
+
         }
 
     }
-	
+
 }

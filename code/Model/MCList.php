@@ -1,7 +1,7 @@
-<?php 
+<?php
 
 class MCList extends DataObject {
-    
+
     public static $db = array(
         'ListID' => 'Varchar(255)',
         'WebID' => 'Int',
@@ -11,24 +11,24 @@ class MCList extends DataObject {
         'Cleaned' => 'Int',
         'SortOrder' => 'Int'
     );
-    
+
     public static $has_many = array(
         'MCListFields' => 'MCListField',
         'MCListSegments' => 'MCListSegment',
         'MCSubscriptions' => 'MCSubscription'
     );
-    
+
     public static $default_sort = "SortOrder ASC";
-    
+
     public function getCMSFields() {
-        
+
         $lid = new TextField('ListID', 'List ID');
         $wid = new TextField('WebID', 'Web ID');
         $name = new TextField('Name', 'List Name');
         $sub = new TextField('Subscribed', '# of Subscribed Members');
         $unsub = new TextField('Unsubscribed', '# of Un-Subscribed Members');
         $clean = new TextField('Cleaned', '# of Cleaned Members');
-        
+
         $fields = parent::getCMSFields();
         $fields->addFieldToTab('Root.Main', $lid->performReadonlyTransformation());
         $fields->addFieldToTab('Root.Main', $wid->performReadonlyTransformation());
@@ -36,12 +36,12 @@ class MCList extends DataObject {
         $fields->addFieldToTab('Root.Main', $sub->performReadonlyTransformation());
         $fields->addFieldToTab('Root.Main', $unsub->performReadonlyTransformation());
         $fields->addFieldToTab('Root.Main', $clean->performReadonlyTransformation());
-        
+
         $fields->removeByName("SortOrder");
         $fields->removeByName("MCListFields");
         $fields->removeByName("MCListSegments");
         $fields->removeByName("MCSubscriptions");
-        
+
         /* START LIST SUBSCRIBERS GRIDFIELD */
         $config = GridFieldConfig_RecordEditor::create();
         $addComponent = $config->getComponentByType("GridFieldAddNewButton");
@@ -62,7 +62,7 @@ class MCList extends DataObject {
 	    );
 	    $fields->addFieldToTab('Root.ListSubscribers', $gf);
         /* FINISH LIST SUBSCRIBERS GRIDFIELD */
-        
+
         /* START MC LIST SEGMENTS GRIDFIELD */
         $config = GridFieldConfig_RecordEditor::create();
         $addComponent = $config->getComponentByType("GridFieldAddNewButton");
@@ -82,7 +82,7 @@ class MCList extends DataObject {
 	    );
 	    $fields->addFieldToTab('Root.ListSegments', $gf);
         /* FINISH MC LIST SEGMENTS GRIDFIELD */
-        
+
         /* START MC LIST FIELDS GRIDFIELD */
         $config = GridFieldConfig_RecordEditor::create();
         //$config->getComponentByType("GridFieldAddNewButton")->setButtonName("Add List Field Relationships");
@@ -105,8 +105,8 @@ class MCList extends DataObject {
         );
         $fields->addFieldToTab('Root.ListFieldMappings', $gf);
         /* FINISH MC LIST FIELDS GRIDFIELD */
-        
+
         return $fields;
     }
-    
+
 }
