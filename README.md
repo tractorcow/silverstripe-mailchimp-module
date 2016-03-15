@@ -53,7 +53,7 @@ composer require quadra-digital/silverstripe-mailchimp-module
 The module will create a directory to hold logs in your websites /assets folder at '/assets/silverstripe-mailchimp-module/logs/' this will contain an info.log and error.log file (if notices and/or errors have been rasied) which should provide straight forward explanations of what has gone wrong.
 
 ## Licence
-This module uses the BSD 3-Clause license. See the [LICENCE.md](/blob/master/LICENCE.md) file for the full licence.
+This module uses the BSD 3-Clause license. See the [LICENCE.md](/LICENCE.md) file for the full licence.
 
 ## Copyright
 Copyright (c) 2016, [Quadrahedron Limited](https://www.quadradigital.co.uk)
