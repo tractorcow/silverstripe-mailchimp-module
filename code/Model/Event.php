@@ -1,9 +1,6 @@
 <?php
 
 /**
- * This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
- * To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/.
- *
  * A very simple example event object. This is provided solely so that MCEvent
  * has something to extend from. You can modify this file and/or replace it
  * entirely with your own event however, be aware that the $belongs_many_many

@@ -1,11 +1,7 @@
 <?php
 
-/**
- * This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
- * To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/.
- */
 class MCListSegment extends DataObject {
-    
+
     private $_firstWrite;
     private $_syncMailChimp;
 
@@ -13,16 +9,16 @@ class MCListSegment extends DataObject {
         'Title' => 'Varchar(255)',
         'MCListSegmentID' => 'Int'
     );
-    
+
     public static $has_one = array(
         'Event' => 'Event',
         'MCList' => 'MCList'
     );
-    
+
     public static $defaults = array(
         'MCListSegmentID' => 0
     );
-    
+
     // Setters & Getters for SynvMail Chimp (Defaults to true)
     public function setSyncMailChimp($sync = false) {
         $this->_syncMailChimp = (empty($sync)) ? false : true;
@@ -33,12 +29,12 @@ class MCListSegment extends DataObject {
         }
         return $this->_syncMailChimp;
     }
-    
+
     public function getCMSFields() {
         $fields = parent::getCMSFields();
         return $fields;
     }
-    
+
     public function getRelatedListName() {
         $list = $this->getComponent("MCList");
         if(!empty($list->ID)) {
@@ -47,7 +43,7 @@ class MCListSegment extends DataObject {
             return false;
         }
     }
-    
+
     public function getRelatedEventName() {
         $event = $this->getComponent("Event");
         if(!empty($event->ID)) {
@@ -56,7 +52,7 @@ class MCListSegment extends DataObject {
             return "(Not Related To Any Event)";
         }
     }
-    
+
     //OnBeforeWrite Flag Getter/Setter Functions
 	public function getFirstWrite() {
 	   if(isset($this->_firstWrite)) {
@@ -67,33 +63,33 @@ class MCListSegment extends DataObject {
 	public function setFirstWrite($state = false) {
 	    $this->_firstWrite = $state;
 	}
-    
+
     public function onAfterWrite() {
-        
+
         parent::onAfterWrite();
-        
+
         if(
             $this->isChanged("ID") && // If This Is The Creation Write
             $this->getFirstWrite() && // And This Is The First Run Of Write
             $this->getSyncMailChimp() // And We Want To Sync To MailChimp (i.e. Not On Creation via MailChimp Import)
         ) {
-            
+
             $apikey = SiteConfig::current_site_config()->getMCAPIKey();
             $api = new MCAPI($apikey);
 
             $list = $this->getComponent("MCList");
             if(!empty($list)) {
-                
+
                 // Limitited to 50 Bytes (Hopefully 50 Chars)
                 $SegmentTitle = substr($this->Title, 0,  45);
-                
-                $api->listStaticSegmentAdd($list->ListID, $SegmentTitle); 
+
+                $api->listStaticSegmentAdd($list->ListID, $SegmentTitle);
 
                 if($api->errorCode) {
                     SS_Log::log("API Call Failed: listStaticSegmentAdd(); | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                 } else {
                     SS_Log::log("API Call Success: listStaticSegmentAdd();", SS_Log::NOTICE);
-                    
+
                     // Make Second Call To Return MailChimp Segment ID
                     $segments = $api->listStaticSegments($list->ListID);
                     foreach($segments as $segment) {
@@ -108,36 +104,36 @@ class MCListSegment extends DataObject {
                             break;
                         }
                     }
-                    
-                }  
+
+                }
             }
-           
+
        } // END: if($this->isChanged("ID")) {
-       
+
        $this->setFirstWrite(false);
-    
+
     }
-    
+
     public function onAfterDelete() {
-        
+
         parent::onBeforeDelete();
-        
+
         $apikey = SiteConfig::current_site_config()->getMCAPIKey();
         $api = new MCAPI($apikey);
-        
+
         $list = $this->getComponent("MCList");
         if(
             !empty($list->ID) && // If We Have a Related List
             $this->getSyncMailChimp() // And We Want To Sync To MailChimp (i.e. Not a Deletion via MailChimp Import Sync)
         ) {
-            $api->listStaticSegmentDel($list->ListID, $this->MCListSegmentID); 
+            $api->listStaticSegmentDel($list->ListID, $this->MCListSegmentID);
             if($api->errorCode) {
                SS_Log::log("API Call Failed: listStaticSegmentDel(); | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
             } else {
                SS_Log::log("API Call Success: listStaticSegmentDel();", SS_Log::NOTICE);
             }
         }
-        
+
     }
-    
+
 }
