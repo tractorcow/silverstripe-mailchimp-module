@@ -1,6 +1,10 @@
 <?php
 
-class MCEvent extends Event {
+class MCEvent extends DataObject {
+
+    private static $belongs_many_many = array(
+        'Attendees' => 'Member'
+    );
 
     private static $has_many = array(
         'MCListSegments' => 'MCListSegment'
@@ -18,7 +22,7 @@ class MCEvent extends Event {
         $fields->removeByName("MCListSegments");
 
         // Manually Manage Creation of MCListSegments Based on Selected MCLists
-        if(empty($this->ID)) {
+        if(empty($this->owner->ID)) {
             $lists = new DataList("MCList");
             if($lists->count() > 1) {
                 $fields->addFieldToTab('Root.Main', new LiteralField('_AffectedMCListsTitle', '<h2>Affected MailChimp Lists</h2>'));
@@ -59,14 +63,14 @@ class MCEvent extends Event {
         parent::onAfterWrite();
 
         // On Event Creation Instanciate New MCListSegment Object(s)
-        if($this->isChanged("ID") && $this->getFirstWrite()) {
+        if($this->owner->isChanged("ID") && $this->getFirstWrite()) {
            if(!empty($this->_AffectedMCListIDs)) {
                $ListData = explode(',', $this->_AffectedMCListIDs);
                foreach($ListData as $ListID) {
                    $seg = new MCListSegment();
                    $seg->setField("MCListID", $ListID);
-                   $seg->setField("EventID", $this->ID);
-                   $seg->setField("Title", "Event ".$this->ID.": ".$this->Title);
+                   $seg->setField("EventID", $this->owner->ID);
+                   $seg->setField("Title", "Event ".$this->owner->ID.": ".$this->owner->getTitle());
                    $seg->write();
                }
            }
@@ -79,7 +83,7 @@ class MCEvent extends Event {
         parent::onAfterDelete();
 
         // Trigger Deletion Of All Related MCListSegments On Event Deletion
-        $segments = $this->getComponents("MCListSegments");
+        $segments = $this->owner->getComponents("MCListSegments");
         foreach($segments as $segment) {
             $segment->delete();
         }

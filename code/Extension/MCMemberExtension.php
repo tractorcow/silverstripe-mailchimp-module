@@ -21,7 +21,7 @@ class MCMemberExtension extends DataExtension {
     );
 
     private static $many_many = array(
-        'Events'    => 'Event'
+        'Events'    => 'MCEvent'
     );
 
     public function updateCMSFields(FieldList $fields) {
