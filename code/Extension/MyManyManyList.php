@@ -69,9 +69,9 @@ class MyManyManyList extends ManyManyList{
                     }
                     $api->listStaticSegmentMembersAdd($list->ListID, $segment->MCListSegmentID, $identifiers);
                     if($api->errorCode) {
-                        SS_Log::log("API Call Failed: listStaticSegmentMembersAdd(".$list->ListID.", ".$segment->MCListSegmentID.", ".$identifiers."); | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
+                        SS_Log::log("API Call Failed: listStaticSegmentMembersAdd(".$list->ListID.", ".$segment->MCListSegmentID.", ".json_encode($identifiers)."); | Error Code = ".$api->errorCode . " | Error Message = " . $api->errorMessage, SS_Log::ERR);
                     } else {
-                        SS_Log::log("API Call Success: listStaticSegmentMembersAdd(".$list->ListID.", ".$segment->MCListSegmentID.", ".$identifiers.");", SS_Log::NOTICE);
+                        SS_Log::log("API Call Success: listStaticSegmentMembersAdd(".$list->ListID.", ".$segment->MCListSegmentID.", ".json_encode($identifiers).");", SS_Log::NOTICE);
                     }
                 }
             }
