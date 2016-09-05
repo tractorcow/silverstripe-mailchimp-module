@@ -10,6 +10,14 @@ class MCEvent extends DataObject {
         'MCListSegments' => 'MCListSegment'
     );
 
+    private static $summary_fields = array(
+        'getTitle' => 'Title'
+    );
+
+    private static $searchable_fields = array(
+        'ID'
+    );
+
     public $_firstWrite;
 
     public $_AffectedMCListIDs;
@@ -41,8 +49,8 @@ class MCEvent extends DataObject {
         $gf = $fields->fieldByName('Root.Attendees.Attendees');
         if (is_object($gf) && $gf->exists()) {
             $gf->setList($this->getMyManyManyComponents('Attendees'));
-        $config = $gf->getConfig();
-        $config->removeComponentsByType('GridfieldAddNewButton');
+            $config = $gf->getConfig();
+            $config->removeComponentsByType('GridfieldAddNewButton');
         }
 
         return $fields;
