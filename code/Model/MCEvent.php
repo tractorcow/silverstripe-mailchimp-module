@@ -37,6 +37,11 @@ class MCEvent extends DataObject {
             $fields->addFieldToTab('Root.Main', $listIDs);
         }
 
+        // Configure Attendees Gridfield
+        $gf = $fields->fieldByName('Root.Attendees.Attendees');
+        $config = $gf->getConfig();
+        $config->removeComponentsByType('GridfieldAddNewButton');
+
         return $fields;
 
     }

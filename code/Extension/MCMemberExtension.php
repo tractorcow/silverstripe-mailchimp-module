@@ -51,6 +51,12 @@ class MCMemberExtension extends DataExtension {
         $fields->addFieldToTab('Root.SubscriberRecords', $l);
         /* FINISH MCLISTS GRIDFIELD */
 
+        // Configure Events Gridfield
+        $gf = $fields->fieldByName('Root.Events.Events');
+        $gf->setList($this->owner->getMyManyManyComponents('Events'));
+        $config = $gf->getConfig();
+        $config->removeComponentsByType('GridfieldAddNewButton');
+
     }
 
     public function setSubscriptionData($subID, $data) {
