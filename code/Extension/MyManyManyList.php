@@ -3,11 +3,6 @@
 /**
  * Extending the ManyManyList Class in Order to Add Hooks in the add()/remove() Methods Which Trigger Logic When Two DataObjects Have a Relationship Created/Destroyed
  *
- * @todo
- * - Capture The Appropriate Pair of Objects in the add()/remove() methods
- * - Move the onLink() and onUnlink() methods in to the DataObject Extension
- * - Pass The A Object to the B Object onLink()/onUnlink() Method (e.g. in add() - $event->onLink($member); $member->onLink($event);)
- *
 */
 class MyManyManyList extends ManyManyList{
 
@@ -50,8 +45,17 @@ class MyManyManyList extends ManyManyList{
         $api = new MCAPI($apikey);
 
         // Define Child/Parent Objects Being Related Based on ManyManyList's (the Parent Class) localKey/foreignKey Fields
-        $member = Member::get()->where("\"ID\" = '".$this->foreignID."'")->first();
-        $event = $item;
+        $mid = $this->getField($this->getForeignKey());
+        $eid = $this->getField($this->getLocalKey());
+        $member = Member::get()->byID($mid);
+        $event = MCEvent::get()->byID($eid);
+        if(!is_object($event) || !$event->exists()) {
+            SS_Log::log('MyManyManyList::onLink - No valid event object found, ID: ' . $eid, SS_Log::ERR);
+            return;
+        } else if(!is_object($member) || !$member->exists()) {
+            SS_Log::log('MyManyManyList::onLink - No valid member object found, ID: ' . $mid, SS_Log::ERR);
+            return;
+        }
         $segments = $event->getComponents("MCListSegments");
 
         // Mailchimp Static Segment Addition Logic
@@ -98,8 +102,17 @@ class MyManyManyList extends ManyManyList{
         $api = new MCAPI($apikey);
 
         // Define Child/Parent Objects Being Related Based on ManyManyList's (the Parent Class) localKey/foreignKey Fields
-        $member = Member::get()->where("\"ID\" = '".$this->foreignID."'")->first();
-        $event = $item;
+        $mid = $this->getField($this->getForeignKey());
+        $eid = $this->getField($this->getLocalKey());
+        $member = Member::get()->byID($mid);
+        $event = MCEvent::get()->byID($eid);
+        if(!is_object($event) || !$event->exists()) {
+            SS_Log::log('MyManyManyList::onUnlink - No valid event object found, ID: ' . $eid, SS_Log::ERR);
+            return;
+        } else if(!is_object($member) || !$member->exists()) {
+            SS_Log::log('MyManyManyList::onUnlink - No valid member object found, ID: ' . $mid, SS_Log::ERR);
+            return;
+        }
         $segments = $event->getComponents("MCListSegments");
 
         // Mailchimp Static Segment Removal Logic

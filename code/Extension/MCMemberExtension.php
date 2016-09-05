@@ -53,9 +53,11 @@ class MCMemberExtension extends DataExtension {
 
         // Configure Events Gridfield
         $gf = $fields->fieldByName('Root.Events.Events');
-        $gf->setList($this->owner->getMyManyManyComponents('Events'));
-        $config = $gf->getConfig();
-        $config->removeComponentsByType('GridfieldAddNewButton');
+        if (is_object($gf) && $gf->exists()) {
+            $gf->setList($this->owner->getMyManyManyComponents('Events'));
+            $config = $gf->getConfig();
+            $config->removeComponentsByType('GridfieldAddNewButton');
+        }
 
     }
 

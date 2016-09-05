@@ -39,8 +39,11 @@ class MCEvent extends DataObject {
 
         // Configure Attendees Gridfield
         $gf = $fields->fieldByName('Root.Attendees.Attendees');
+        if (is_object($gf) && $gf->exists()) {
+            $gf->setList($this->getMyManyManyComponents('Attendees'));
         $config = $gf->getConfig();
         $config->removeComponentsByType('GridfieldAddNewButton');
+        }
 
         return $fields;
 
