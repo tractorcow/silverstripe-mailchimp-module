@@ -11,7 +11,7 @@ class MCListSegment extends DataObject {
     );
 
     public static $has_one = array(
-        'Event' => 'Event',
+        'Event' => 'MCEvent',
         'MCList' => 'MCList'
     );
 

@@ -2,7 +2,6 @@
     "name": "quadra-digital/silverstripe-mailchimp-module",
     "description": "The Silverstripe Mailchimp Module enables you to keep your Mailchimp mailing list in sync with the subscribers and/or members of your Silverstripe website.",
     "homepage": "https://github.com/Quadra-Digital/silverstripe-mailchimp-module",
-    "time": "2016-03-09",
     "keywords": [
         "silverstripe",
         "mailchimp"

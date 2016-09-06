@@ -21,7 +21,7 @@ class MCMemberExtension extends DataExtension {
     );
 
     private static $many_many = array(
-        'Events'    => 'Event'
+        'Events'    => 'MCEvent'
     );
 
     public function updateCMSFields(FieldList $fields) {
@@ -50,6 +50,14 @@ class MCMemberExtension extends DataExtension {
 		    );
         $fields->addFieldToTab('Root.SubscriberRecords', $l);
         /* FINISH MCLISTS GRIDFIELD */
+
+        // Configure Events Gridfield
+        $gf = $fields->fieldByName('Root.Events.Events');
+        if (is_object($gf) && $gf->exists()) {
+            $gf->setList($this->owner->getMyManyManyComponents('Events'));
+            $config = $gf->getConfig();
+            $config->removeComponentsByType('GridfieldAddNewButton');
+        }
 
     }
 
