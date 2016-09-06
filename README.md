@@ -25,7 +25,7 @@ The module syncs data both ways (this can be managed on a field by field basis) 
 * When someone decides to un-attend, they will be removed from the static segment in both SilverStripe and Mailchimp
 
 ## Requirements
-[`silverstripe/cms: 3.x`](https://github.com/silverstripe/silverstripe-cms/tree/3)
+[`silverstripe/cms: 3.1+`](https://github.com/silverstripe/silverstripe-cms/tree/3)
 
 [`silverstripe/gridfieldextensions: 1.x`](https://github.com/silverstripe-australia/silverstripe-gridfieldextensions/tree/1.0)
 
@@ -36,6 +36,7 @@ composer require quadra-digital/silverstripe-mailchimp-module
 ```
 ### Manual
 * Download the code base by either cloning this repository or downloading the provided .zip file
+* Download the dependencies listed in requirements
 * You can name the module directory whatever you like, we reccomend mailchimp-module
 * Place the module directory in the sites web root (i.e. at the same level as /mysite)
 
